@@ -38,7 +38,7 @@ function generator_tagcloud() {
     }
     $c = max($c,5);
     foreach ($tags as $t) {
-        $tagcloud .= "<a class='t".floor(($t[1]/$c)*4)."' href='".genURL("search?tags=".htmlspecialchars(urlencode($t[0])))."'>".htmlspecialchars($t[0])."</a>";
+        $tagcloud .= "<a class='t".floor(($t[1]/$c)*4)."' href='".genURL("search?tags=".htmlspecialchars(urlencode($t[0])))."'>".format($t[0])."</a>";
     }
     $tagcloud .= "</div>";
     return $tagcloud;
@@ -49,7 +49,7 @@ function getTagsForThread($threadid, $aslinks=false) {
     $tquery = $db->query("SELECT * FROM tags WHERE threadid=$threadid");
     $tags = "";
     while ($row = $tquery->fetch_assoc()) {
-        if ($aslinks) $tags .= "<a href='".genURL("search?tags=".htmlspecialchars(urlencode($row["tag"])))."'>" . htmlspecialchars($row["tag"]) . "</a>, ";
+        if ($aslinks) $tags .= "<a href='".genURL("search?tags=".htmlspecialchars(urlencode($row["tag"])))."'>" . format($row["tag"]) . "</a>, ";
         else $tags .= htmlspecialchars($row["tag"]) . ", ";
     }
     return rtrim($tags,", ");
