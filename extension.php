@@ -24,7 +24,11 @@ if ($tagtablecheck->num_rows < 1)
 }
 
 function addStyles() {
+    global $theme_manifest;
     echo "<style>.tdtags {margin-left:1em;} #edittags:focus {border: var(--c-gradient-bottom) 1px solid; padding: 2px 2px;} #edittags {border:unset;background:unset;margin-right:2px;padding:3px;padding-left:0px;} .edit_tag_container {width:350px;display:inline-grid;grid-template-columns:1fr auto;margin-bottom:2px} .tagcloud {margin-bottom:20px;text-align:center;line-height:21px} .tagcloud > * {margin-right:1em;overflow-wrap:break-word;color:var(--c-gradient-bottom-darker);} .t0 {font-size:12px;opacity:0.75;} .t1 {font-size:13px;opacity:0.75;} .t2 {font-size:15px;opacity:0.85;} .t3 {font-size:17px;opacity:0.9;} .t4 {font-size:19px;}</style>";
+    if (isset($theme_manifest->color_scheme) && $theme_manifest->color_scheme == "dark") {
+        echo "<style>.tagcloud > * {color:var(--c-highlight)}</style>";
+    }
 }
 function generator_tagcloud() {
     global $db, $ext, $extension_config;
