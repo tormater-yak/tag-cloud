@@ -6,6 +6,7 @@
       {"id":"tag_cloud_size", "name":"Tag cloud size", "type":"int", "default":"30"},
       {"id":"max_tags_per_thread","name":"Max tags per thread","type":"int","default":"15"},
       {"id":"add_to_homepage","name":"Add tag cloud to homepage","type":"bool","default":"1"},
-      {"id":"proper_gerunds","name":"Only allow gerunds as tags","type":"bool","default":"0"}
+      {"id":"proper_gerunds","name":"Only allow gerunds as tags","type":"bool","default":"0"},
+      {"id":"tag_whitelist","name":"Only allow these tags to be used. Leave this field empty for no restrictions, and include one tag per line. You may include a category ID number in square brackets (eg. [#3]) to whitelist tags for a specific category only.","type":"text","default":""}
   ]
 }
