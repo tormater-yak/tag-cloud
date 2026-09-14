@@ -105,10 +105,10 @@ function getValidTagsFromString($string, $category) {
 }
 
 function addEditTagForm(&$args) {
-    global $author, $viewerid, $template, $extensiondir, $db, $q2, $extension_config, $ext, $categoryID;
+    global $author, $viewerid, $template, $extensiondir, $db, $q2, $extension_config, $ext, $categoryID, $locked;
     if ($args[0] != "templates/thread/thread.html") return;
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST["edittags"])) {
-        if (($author["userid"] == $viewerid and get_role_permissions() & PERM_CREATE_THREAD) or get_role_permissions() & PERM_EDIT_THREAD) {
+        if (($author["userid"] == $viewerid and get_role_permissions() & PERM_CREATE_THREAD and $locked != true) or get_role_permissions() & PERM_EDIT_THREAD) {
             $db->query("DELETE FROM tags WHERE threadid='" . $db->real_escape_string($q2) . "'");
             $tags = getValidTagsFromString($_POST["edittags"],$categoryID);
             $c = 0;
@@ -121,7 +121,7 @@ function addEditTagForm(&$args) {
     }
     $data = &$args[1];
     $tdata = ["tags"=>"","submit"=>"Save tags"];
-    if (($author["userid"] == $viewerid and get_role_permissions() & PERM_CREATE_THREAD) or get_role_permissions() & PERM_EDIT_THREAD) {
+    if (($author["userid"] == $viewerid and get_role_permissions() & PERM_CREATE_THREAD and $locked != true) or get_role_permissions() & PERM_EDIT_THREAD) {
         $tdata["tags"] = getTagsForThread($db->real_escape_string($q2));
         $tags = $template->render($extensiondir . "templates/thread_tags_edit.html",$tdata);
     }
