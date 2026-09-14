@@ -20,7 +20,7 @@ if ($tagtablecheck->num_rows < 1)
     FOREIGN KEY (threadid)
     REFERENCES threads(threadid)
     ON DELETE CASCADE
-); ");
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_bin;");
 }
 
 function addStyles() {
