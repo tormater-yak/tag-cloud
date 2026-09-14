@@ -55,15 +55,45 @@ function getTagsForThread($threadid, $aslinks=false) {
     return rtrim($tags,", ");
 }
 
-function getValidTagsFromString($string) {
+function getWhitelistedTags($whitelist, $category) {
+    $tag_whitelist = array();
+    $in_category = true;
+    $line = strtok($whitelist, "\r\n");
+    while ($line !== false) {
+        if ($line[0] == "[" && ($line[1] == "#" || $line[1] == "*") && $line[-1] == "]") {
+            if ($line[1] == "*") $in_category = true;
+            else {
+                if (substr($line,2,-1) == $category) $in_category = true;
+                else $in_category = false;
+            }
+            $line = strtok("\r\n");
+            continue;
+        }
+        if ($in_category) {
+            $tag_whitelist[] = trim(strtolower($line));
+        }
+        $line = strtok("\r\n");
+    }
+    return $tag_whitelist;
+}
+
+function getValidTagsFromString($string, $category) {
+    global $ext, $extension_config, $tag_whitelist;
+    $tag_whitelist = array();
+    if (strlen($extension_config[$ext]["tag_whitelist"]) && $category != -32767) {
+        $tag_whitelist = getWhitelistedTags($extension_config[$ext]["tag_whitelist"],$category);
+    }
     $tags = explode(",",$string);
     foreach($tags as &$t) {
         $t = trim(strtolower($t));
-    }
+    }    
     $tags = array_filter($tags, function ($x) {
-        global $ext, $extension_config;
+        global $ext, $extension_config, $tag_whitelist;
         if ($extension_config[$ext]["proper_gerunds"]) {
             if (substr_compare($x, "ing", -3)) return false;
+        }
+        if (count($tag_whitelist)) {
+            if (!in_array($x,$tag_whitelist)) return false;
         }
         return strlen($x) && (strlen($x) < 64);
     });
@@ -71,12 +101,12 @@ function getValidTagsFromString($string) {
 }
 
 function addEditTagForm(&$args) {
-    global $author, $viewerid, $template, $extensiondir, $db, $q2, $extension_config, $ext;
+    global $author, $viewerid, $template, $extensiondir, $db, $q2, $extension_config, $ext, $categoryID;
     if ($args[0] != "templates/thread/thread.html") return;
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST["edittags"])) {
         if (($author["userid"] == $viewerid and get_role_permissions() & PERM_CREATE_THREAD) or get_role_permissions() & PERM_EDIT_THREAD) {
             $db->query("DELETE FROM tags WHERE threadid='" . $db->real_escape_string($q2) . "'");
-            $tags = getValidTagsFromString($_POST["edittags"]);
+            $tags = getValidTagsFromString($_POST["edittags"],$categoryID);
             $c = 0;
             foreach ($tags as $t) {
                 $c++;
@@ -100,7 +130,7 @@ function addEditTagForm(&$args) {
 
 function addTagsToNewThread(&$args) {
     global $db, $extension_config, $ext;
-    $tags = getValidTagsFromString($_POST["tags"]);
+    $tags = getValidTagsFromString($_POST["tags"],$db->real_escape_string($_POST["category"]));
     $c = 0;
     foreach ($tags as $t) {
         $c++;
@@ -137,7 +167,7 @@ function addTagsToSearchResults(&$args) {
     $and = &$args[1];
     $query = &$args[0];
     if (!isset($get["tags"]) || $get["tags"] == null) return;
-    $tags = getValidTagsFromString(urldecode(htmlspecialchars_decode($get["tags"])));
+    $tags = getValidTagsFromString(urldecode(htmlspecialchars_decode($get["tags"])),-32767);
     if (!count($tags)) return;
     foreach ($tags as &$tag) {
         $tag = "'".$db->real_escape_string($tag)."'";
